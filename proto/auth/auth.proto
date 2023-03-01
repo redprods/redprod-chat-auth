@@ -1,0 +1,19 @@
+
+option go_package = "./";
+
+import "user/user.proto";
+
+service AuthService {
+    rpc Register(AuthRequest) returns (AuthResponse);
+    rpc Auth(AuthRequest) returns (AuthResponse);
+    rpc GetUser(User) returns (User);
+}
+
+message AuthRequest {
+    required string login = 1;
+    required string password = 2;
+}
+
+message AuthResponse {
+    required string access_token = 1;
+}
