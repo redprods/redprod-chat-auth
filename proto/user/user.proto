@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option go_package = "./";
-
-message User {
-    int32 id = 1;
-    string login = 2;
-    string password = 3;
-}
