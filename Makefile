@@ -1,10 +1,12 @@
 
-build-proto:
-	protoc --proto_path=./proto \
-	 	--go_out=./internal/proto \
-		--go-grpc_out=./internal/proto \
-		--go-grpc_opt=paths=source_relative \
-		--go_opt=paths=source_relative \
-			auth/auth.proto \
-			message/message.proto \
-			user/user.proto
+install:
+	go install \
+		github.com/bufbuild/buf/cmd/buf \
+		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
+		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
+		google.golang.org/grpc/cmd/protoc-gen-go-grpc \
+		google.golang.org/protobuf/cmd/protoc-gen-go 
+
+generate:
+	rm -Rf pkg/pb
+	buf generate
