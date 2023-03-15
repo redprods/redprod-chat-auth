@@ -1,7 +1,10 @@
 package store
 
 import (
+	"context"
+
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Store struct {
@@ -10,7 +13,9 @@ type Store struct {
 }
 
 func NewStore() *Store {
-	db, err := mongo.NewClient()
+	db, err := mongo.Connect(context.Background(),
+		options.Client().ApplyURI("mongodb://mongo"),
+	)
 	if err != nil {
 		panic(err)
 	}

@@ -9,6 +9,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/felixge/httpsnoop"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	srv_grpc "github.com/redprods/redprod-chat-auth/pkg/grpc"
 	"github.com/redprods/redprod-chat-auth/pkg/pb/auth"
@@ -50,7 +53,14 @@ func (s *Service) Run() {
 		log.Fatal(err)
 	}
 
-	grpcSrv := grpc.NewServer()
+	grpcSrv := grpc.NewServer(
+		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			logrus.StreamServerInterceptor(logrus.Extract(ctx)),
+		)),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			logrus.UnaryServerInterceptor(logrus.Extract(ctx)),
+		)),
+	)
 	auth.RegisterAuthServiceServer(grpcSrv, srv_grpc.AuthService{
 		Store: s.Store,
 	})
@@ -59,7 +69,12 @@ func (s *Service) Run() {
 	go func(ctx context.Context) {
 		defer cancel()
 		server := http.Server{
-			Handler: mux,
+			Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				// pass the handler to httpsnoop to get http status and latency
+				m := httpsnoop.CaptureMetrics(mux, writer, request)
+				// printing exracted data
+				log.Printf("http[%d]-- %s -- %s\n", m.Code, m.Duration, request.URL.Path)
+			}),
 		}
 
 		l, err := net.Listen("tcp", ":8081")
@@ -67,6 +82,7 @@ func (s *Service) Run() {
 			log.Fatal(err)
 		}
 
+		log.Println("Starting HTTP serving...")
 		err = server.Serve(l)
 		if err != nil {
 			log.Fatal(err)
@@ -81,6 +97,7 @@ func (s *Service) Run() {
 			log.Fatal(err)
 		}
 
+		log.Println("Starting gRPC serving...")
 		err = grpcSrv.Serve(l)
 		if err != nil {
 			log.Fatal(err)

@@ -9,4 +9,7 @@ install:
 
 generate:
 	rm -Rf pkg/pb
+	cd proto/
+	git pull origin main
+	cd ../
 	buf generate

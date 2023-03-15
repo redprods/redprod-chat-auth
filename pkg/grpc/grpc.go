@@ -23,6 +23,7 @@ func (s AuthService) Register(ctx context.Context, req *auth.AuthRequest) (*auth
 }
 
 func (s AuthService) Login(ctx context.Context, req *auth.AuthRequest) (*auth.AuthResponse, error) {
+
 	return nil, grpc.Errorf(codes.Unimplemented, "unimplemented")
 }
 
