@@ -3,6 +3,9 @@ module github.com/redprods/redprod-chat-auth
 go 1.20
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/felixge/httpsnoop v1.0.3
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	go.mongodb.org/mongo-driver v1.11.2
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923
