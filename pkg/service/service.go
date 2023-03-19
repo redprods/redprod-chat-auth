@@ -16,6 +16,7 @@ import (
 	srv_grpc "github.com/redprods/redprod-chat-auth/pkg/grpc"
 	"github.com/redprods/redprod-chat-auth/pkg/pb/auth"
 	"github.com/redprods/redprod-chat-auth/pkg/store"
+	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -40,6 +41,7 @@ func (s *Service) Run() {
 	defer cancel()
 
 	mux := runtime.NewServeMux()
+
 	err := auth.RegisterAuthServiceHandlerFromEndpoint(
 		ctx,
 		mux,
@@ -70,19 +72,11 @@ func (s *Service) Run() {
 	go func(ctx context.Context) {
 		defer cancel()
 		server := http.Server{
-			Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			Handler: cors.AllowAll().Handler(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				// logging
 				m := httpsnoop.CaptureMetrics(mux, writer, request)
 				log.Printf("http[%d]-- %s -- %s\n", m.Code, m.Duration, request.URL.Path)
-
-				// CORS
-				writer.Header().Set("Access-Control-Allow-Origin", "*")
-				writer.Header().Set("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, HEAD, OPTIONS")
-				if request.Method == http.MethodOptions {
-					writer.WriteHeader(http.StatusNoContent)
-					return
-				}
-			}),
+			})),
 		}
 
 		l, err := net.Listen("tcp", ":8081")
