@@ -138,13 +138,8 @@
     "messengerConversation": {
       "type": "object",
       "properties": {
-        "lastMessageId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "fromUserId": {
-          "type": "integer",
-          "format": "int64"
+        "lastMessage": {
+          "$ref": "#/definitions/messengerMessage"
         }
       }
     },
@@ -182,16 +177,13 @@
       "type": "object",
       "properties": {
         "userId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string"
         },
         "offset": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string"
         },
         "limit": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string"
         }
       }
     },
@@ -211,16 +203,13 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string"
         },
         "fromUser": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string"
         },
         "toUser": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string"
         },
         "content": {
           "type": "string"

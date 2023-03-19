@@ -61,6 +61,7 @@ func (s *Service) Run() {
 			logrus.UnaryServerInterceptor(logrus.Extract(ctx)),
 		)),
 	)
+
 	auth.RegisterAuthServiceServer(grpcSrv, srv_grpc.AuthService{
 		Store: s.Store,
 	})
@@ -70,10 +71,17 @@ func (s *Service) Run() {
 		defer cancel()
 		server := http.Server{
 			Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-				// pass the handler to httpsnoop to get http status and latency
+				// logging
 				m := httpsnoop.CaptureMetrics(mux, writer, request)
-				// printing exracted data
 				log.Printf("http[%d]-- %s -- %s\n", m.Code, m.Duration, request.URL.Path)
+
+				// CORS
+				writer.Header().Set("Access-Control-Allow-Origin", "*")
+				writer.Header().Set("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, HEAD, OPTIONS")
+				if request.Method == http.MethodOptions {
+					writer.WriteHeader(http.StatusNoContent)
+					return
+				}
 			}),
 		}
 

@@ -16,6 +16,7 @@ func NewStore() *Store {
 	db, err := mongo.Connect(context.Background(),
 		options.Client().ApplyURI("mongodb://mongo"),
 	)
+
 	if err != nil {
 		panic(err)
 	}
