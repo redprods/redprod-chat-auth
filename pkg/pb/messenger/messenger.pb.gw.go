@@ -118,23 +118,6 @@ func local_request_MessengerService_GetMessages_0(ctx context.Context, marshaler
 
 }
 
-func request_MessengerService_Notify_0(ctx context.Context, marshaler runtime.Marshaler, client MessengerServiceClient, req *http.Request, pathParams map[string]string) (MessengerService_NotifyClient, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	stream, err := client.Notify(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
-
-}
-
 // RegisterMessengerServiceHandlerServer registers the http handlers for service MessengerService to "mux".
 // UnaryRPC     :call MessengerServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -214,13 +197,6 @@ func RegisterMessengerServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 
 		forward_MessengerService_GetMessages_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	})
-
-	mux.Handle("GET", pattern_MessengerService_Notify_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
 	})
 
 	return nil
@@ -330,28 +306,6 @@ func RegisterMessengerServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 
 	})
 
-	mux.Handle("GET", pattern_MessengerService_Notify_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/messenger.MessengerService/Notify", runtime.WithHTTPPathPattern("/notify"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_MessengerService_Notify_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_MessengerService_Notify_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
-
-	})
-
 	return nil
 }
 
@@ -361,8 +315,6 @@ var (
 	pattern_MessengerService_GetConversations_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"getConversations"}, ""))
 
 	pattern_MessengerService_GetMessages_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"getMessages"}, ""))
-
-	pattern_MessengerService_Notify_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"notify"}, ""))
 )
 
 var (
@@ -371,6 +323,4 @@ var (
 	forward_MessengerService_GetConversations_0 = runtime.ForwardResponseMessage
 
 	forward_MessengerService_GetMessages_0 = runtime.ForwardResponseMessage
-
-	forward_MessengerService_Notify_0 = runtime.ForwardResponseStream
 )

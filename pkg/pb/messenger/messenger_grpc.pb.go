@@ -26,7 +26,6 @@ type MessengerServiceClient interface {
 	SendMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 	GetConversations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetConversationsResponse, error)
 	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error)
-	Notify(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (MessengerService_NotifyClient, error)
 }
 
 type messengerServiceClient struct {
@@ -64,38 +63,6 @@ func (c *messengerServiceClient) GetMessages(ctx context.Context, in *GetMessage
 	return out, nil
 }
 
-func (c *messengerServiceClient) Notify(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (MessengerService_NotifyClient, error) {
-	stream, err := c.cc.NewStream(ctx, &MessengerService_ServiceDesc.Streams[0], "/messenger.MessengerService/Notify", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &messengerServiceNotifyClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type MessengerService_NotifyClient interface {
-	Recv() (*Event, error)
-	grpc.ClientStream
-}
-
-type messengerServiceNotifyClient struct {
-	grpc.ClientStream
-}
-
-func (x *messengerServiceNotifyClient) Recv() (*Event, error) {
-	m := new(Event)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 // MessengerServiceServer is the server API for MessengerService service.
 // All implementations should embed UnimplementedMessengerServiceServer
 // for forward compatibility
@@ -103,7 +70,6 @@ type MessengerServiceServer interface {
 	SendMessage(context.Context, *Message) (*Message, error)
 	GetConversations(context.Context, *emptypb.Empty) (*GetConversationsResponse, error)
 	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error)
-	Notify(*emptypb.Empty, MessengerService_NotifyServer) error
 }
 
 // UnimplementedMessengerServiceServer should be embedded to have forward compatible implementations.
@@ -118,9 +84,6 @@ func (UnimplementedMessengerServiceServer) GetConversations(context.Context, *em
 }
 func (UnimplementedMessengerServiceServer) GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
-}
-func (UnimplementedMessengerServiceServer) Notify(*emptypb.Empty, MessengerService_NotifyServer) error {
-	return status.Errorf(codes.Unimplemented, "method Notify not implemented")
 }
 
 // UnsafeMessengerServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -188,27 +151,6 @@ func _MessengerService_GetMessages_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MessengerService_Notify_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(MessengerServiceServer).Notify(m, &messengerServiceNotifyServer{stream})
-}
-
-type MessengerService_NotifyServer interface {
-	Send(*Event) error
-	grpc.ServerStream
-}
-
-type messengerServiceNotifyServer struct {
-	grpc.ServerStream
-}
-
-func (x *messengerServiceNotifyServer) Send(m *Event) error {
-	return x.ServerStream.SendMsg(m)
-}
-
 // MessengerService_ServiceDesc is the grpc.ServiceDesc for MessengerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,12 +171,6 @@ var MessengerService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MessengerService_GetMessages_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Notify",
-			Handler:       _MessengerService_Notify_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "messenger/messenger.proto",
 }

@@ -70,37 +70,6 @@
         ]
       }
     },
-    "/notify": {
-      "get": {
-        "operationId": "MessengerService_Notify",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/messengerEvent"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of messengerEvent"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "MessengerService"
-        ]
-      }
-    },
     "/send": {
       "post": {
         "operationId": "MessengerService_SendMessage",
@@ -143,24 +112,6 @@
         }
       }
     },
-    "messengerEvent": {
-      "type": "object",
-      "properties": {
-        "EventType": {
-          "type": "string"
-        },
-        "event": {
-          "$ref": "#/definitions/messengerEventEnum"
-        }
-      }
-    },
-    "messengerEventEnum": {
-      "type": "string",
-      "enum": [
-        "MessageEvent"
-      ],
-      "default": "MessageEvent"
-    },
     "messengerGetConversationsResponse": {
       "type": "object",
       "properties": {
@@ -180,10 +131,12 @@
           "type": "string"
         },
         "offset": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "limit": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         }
       }
     },
