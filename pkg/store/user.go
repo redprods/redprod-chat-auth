@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/redprods/redprod-chat-auth/pkg/pb/auth"
+	"github.com/redprods/redprod-chat-auth/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Store) GetUserById(ctx context.Context, id string) (*auth.User, error) {
+func (s *Store) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	user_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (s *Store) GetUserById(ctx context.Context, id string) (*auth.User, error) 
 		"_id": user_id,
 	})
 
-	user := &auth.User{}
+	user := &models.User{}
 
 	if err := tx.Decode(user); err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -34,14 +34,14 @@ func (s *Store) GetUserById(ctx context.Context, id string) (*auth.User, error) 
 	return user, nil
 }
 
-func (s *Store) FindUser(ctx context.Context, login string) ([]*auth.User, error) {
+func (s *Store) FindUser(ctx context.Context, login string) ([]*models.User, error) {
 	cur, err := s.UC.Find(ctx, bson.M{
 		"login": bson.M{
 			"regex": fmt.Sprintf("%s.*", login),
 		},
 	})
 
-	users := []*auth.User{}
+	users := []*models.User{}
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -52,7 +52,7 @@ func (s *Store) FindUser(ctx context.Context, login string) ([]*auth.User, error
 	defer cur.Close(ctx)
 
 	for cur.Next(ctx) {
-		user := &auth.User{}
+		user := &models.User{}
 		if err := cur.Decode(user); err != nil {
 			return nil, err
 		}
@@ -62,7 +62,7 @@ func (s *Store) FindUser(ctx context.Context, login string) ([]*auth.User, error
 	return users, nil
 }
 
-func (s *Store) CreateUser(ctx context.Context, user *auth.User) error {
+func (s *Store) CreateUser(ctx context.Context, user *models.User) error {
 	txf := s.UC.FindOne(ctx, bson.M{
 		"login": user.Login,
 	})
@@ -88,7 +88,7 @@ func (s *Store) CreateUser(ctx context.Context, user *auth.User) error {
 		return err
 	}
 
-	user.Id = []byte(tx.InsertedID.(primitive.ObjectID).Hex())
+	user.Id = tx.InsertedID.(primitive.ObjectID)
 
 	return nil
 }

@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 
+	"github.com/redprods/redprod-chat-auth/pkg/models"
 	"github.com/redprods/redprod-chat-auth/pkg/pb/auth"
 	"github.com/redprods/redprod-chat-auth/pkg/store"
 	"github.com/redprods/redprod-chat-auth/pkg/util"
@@ -21,7 +22,12 @@ func (s AuthService) GetUser(ctx context.Context, req *auth.GetUserRequest) (*au
 		return nil, err
 	}
 
-	return user, nil
+	return &auth.User{
+		Id:        []byte(user.Id.Hex()),
+		Login:     user.Login,
+		Password:  user.Password,
+		CreatedAt: user.CreatedAt.Unix(),
+	}, nil
 }
 
 func (s AuthService) Register(ctx context.Context, req *auth.AuthRequest) (*auth.AuthResponse, error) {
@@ -29,7 +35,7 @@ func (s AuthService) Register(ctx context.Context, req *auth.AuthRequest) (*auth
 		return nil, status.Errorf(codes.InvalidArgument, "length of login and password must be >= 4")
 	}
 
-	user := &auth.User{
+	user := &models.User{
 		Login:    req.Login,
 		Password: req.Password,
 	}
@@ -38,7 +44,7 @@ func (s AuthService) Register(ctx context.Context, req *auth.AuthRequest) (*auth
 		return nil, err
 	}
 
-	token, err := util.GenerateJWT(string(user.Id))
+	token, err := util.GenerateJWT(user.Id.Hex())
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +75,20 @@ func (s AuthService) FindUser(ctx context.Context, req *auth.FindUsersRequest) (
 		return nil, err
 	}
 
+	_users := []*auth.User{}
+
+	for _, user := range users {
+		_users = append(_users,
+			&auth.User{
+				Id:        []byte(user.Id.Hex()),
+				Login:     user.Login,
+				Password:  user.Password,
+				CreatedAt: user.CreatedAt.Unix(),
+			})
+	}
+
 	return &auth.FindUsersResponse{
-		Users: users,
+		Users: _users,
 	}, nil
 }
 
@@ -85,5 +103,10 @@ func (s AuthService) Me(ctx context.Context, in *auth.MeRequest) (*auth.User, er
 		return nil, err
 	}
 
-	return user, nil
+	return &auth.User{
+		Id:        []byte(user.Id.Hex()),
+		Login:     user.Login,
+		Password:  user.Password,
+		CreatedAt: user.CreatedAt.Unix(),
+	}, nil
 }
