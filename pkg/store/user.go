@@ -14,8 +14,12 @@ import (
 )
 
 func (s *Store) GetUserById(ctx context.Context, id string) (*auth.User, error) {
+	user_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
 	tx := s.UC.FindOne(ctx, bson.M{
-		"_id": id,
+		"_id": user_id,
 	})
 
 	user := &auth.User{}
