@@ -77,7 +77,7 @@ func (s AuthService) FindUser(ctx context.Context, req *auth.FindUsersRequest) (
 func (s AuthService) Me(ctx context.Context, in *auth.MeRequest) (*auth.User, error) {
 	user_id, err := util.ParseJWT(in.AccessToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "token is invalid")
+		return nil, err
 	}
 
 	user, err := s.Store.GetUserById(ctx, user_id.Id)
