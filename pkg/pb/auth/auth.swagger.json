@@ -234,7 +234,7 @@
         "login": {
           "type": "string"
         },
-        "-": {
+        "password": {
           "type": "string"
         },
         "createdAt": {
